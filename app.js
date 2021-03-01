@@ -57,6 +57,8 @@ const getMBTiles = async (t, z, x, y) => {
   let tz3 = tz[t] - 2
   if (z < tz[t]) {
     mbtilesPath = `${mbtilesDir}/${t}/0-0-0.mbtiles`
+    mbtilesPath2 = `${mbtilesDir}/${t}/0-0-0.mbtiles`
+    mbtilesPath3 = `${mbtilesDir}/${t}/0-0-0.mbtiles`
   } else {
     mbtilesPath =
       `${mbtilesDir}/${t}/${tz[t]}-${x >> (z - tz[t])}-${y >> (z - tz[t])}.mbtiles`
