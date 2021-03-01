@@ -50,16 +50,28 @@ app.use(express.static(htdocsPath))
 
 const getMBTiles = async (t, z, x, y) => {
   let mbtilesPath = ''
+  let mbtilesPath2 = ''
+  let mbtilesPath3 = ''
   if (!tz[t]) tz[t] = defaultZ
+  let tz2 = tz[t] - 1
+  let tz3 = tz[t] - 2
   if (z < tz[t]) {
     mbtilesPath = `${mbtilesDir}/${t}/0-0-0.mbtiles`
   } else {
     mbtilesPath =
       `${mbtilesDir}/${t}/${tz[t]}-${x >> (z - tz[t])}-${y >> (z - tz[t])}.mbtiles`
+    mbtilesPath2 =
+      `${mbtilesDir}/${t}/${tz2}-${x >> (z - tz2)}-${y >> (z - tz2)}.mbtiles`     
+    mbtilesPath3 =
+      `${mbtilesDir}/${t}/${tz3}-${x >> (z - tz3)}-${y >> (z - tz3)}.mbtiles`  
   }
   return new Promise((resolve, reject) => {
     if (mbtilesPool[mbtilesPath]) {
       resolve(mbtilesPool[mbtilesPath].mbtiles)
+    } else if (mbtilesPool[mbtilesPath2]) {
+      resolve(mbtilesPool[mbtilesPath2].mbtiles)
+    } else if (mbtilesPool[mbtilesPath3]) {    
+      resolve(mbtilesPool[mbtilesPath3].mbtiles)
     } else {
       if (fs.existsSync(mbtilesPath)) {
         new MBTiles(`${mbtilesPath}?mode=ro`, (err, mbtiles) => {
@@ -72,6 +84,28 @@ const getMBTiles = async (t, z, x, y) => {
             resolve(mbtilesPool[mbtilesPath].mbtiles)
           }
         })
+      } else if (fs.existsSync(mbtilesPath2)) {
+        new MBTiles(`${mbtilesPath2}?mode=ro`, (err, mbtiles) => {
+          if (err) {
+            reject(new Error(`${mbtilesPath2} could not open.`))
+          } else {
+            mbtilesPool[mbtilesPath2] = {
+              mbtiles: mbtiles, openTime: new Date()
+            }
+            resolve(mbtilesPool[mbtilesPath2].mbtiles)
+          }
+        }) 
+      } else if (fs.existsSync(mbtilesPath3)) {
+        new MBTiles(`${mbtilesPath3}?mode=ro`, (err, mbtiles) => {
+          if (err) {
+            reject(new Error(`${mbtilesPath3} could not open.`))
+          } else {
+            mbtilesPool[mbtilesPath3] = {
+              mbtiles: mbtiles, openTime: new Date()
+            }
+            resolve(mbtilesPool[mbtilesPath3].mbtiles)
+          }
+        }) 
       } else {
         reject(new Error(`${mbtilesPath} was not found.`))
       }
